@@ -70,7 +70,15 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
       */
       //console.log(response);
       //setMessages(prevMessages => [...prevMessages, messageObj]);
-      console.error('메시지 전송 중 오류 발생:', error);
+      
+      const errorMessage: Message = {
+        id: Date.now().toString() + '-error',
+        text: '아래는 링크 주소 입니다.',
+        sender: 'System',
+        timestamp: new Date(),
+      };
+      setMessages(prevMessages => [...prevMessages, errorMessage]);
+      
       
       
     } catch (error) {
@@ -94,7 +102,6 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
             key={message.id} 
             className={`message ${message.sender === username ? 'own-message' : 'other-message'}`}
           >
-            <div className="message-sender">{message.sender}</div>
             <div className="message-text">{message.text}</div>
             <div className="message-time">
               {message.timestamp.toLocaleTimeString()}

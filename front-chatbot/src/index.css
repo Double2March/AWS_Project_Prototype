@@ -5,12 +5,11 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: white;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #2a2a2a;
 }
 
 a {
@@ -68,13 +67,15 @@ button:focus-visible {
 }
 
 .own-message {
-  background-color: #e1f5fe;
-  color: #0277bd; /* 내 메시지 글자색 */
-  text-align: right;
+  background-color: #2a2a2a;
+  color: white; /* 내 메시지 글자색 */
+  text-align: left;
+  align-self: flex-end;
 }
 
 .other-message {
-  background-color: #eeeeee;
+  background-color: #f1f0f0;
   color: #333; /* 상대 메시지 글자색 */
   text-align: left;
+  align-self: flex-start;
 }
