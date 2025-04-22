@@ -7,6 +7,8 @@
 
 - 클라우드 아키텍처 생성하고 API키 입력하면 됨 (25일 목표)
 ```
+|![Image](https://github.com/user-attachments/assets/3aaf3bd6-0cca-4748-a38c-5c0731245c94)|![Image](https://github.com/user-attachments/assets/9784421b-82ae-431f-8f3a-6555d51a3707)|![Image](https://github.com/user-attachments/assets/59a2aea2-b6a6-4b25-a66a-fe618d241523)|
+|-|-|-|
 
 <br>
 
