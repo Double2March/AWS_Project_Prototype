@@ -27,7 +27,7 @@ git clone https://github.com/Double2March/AWS_Project_Prototype.git
 ```
 ### front-end 환경설정
 ```
-npm create vite@latest . -- --template react-ts
+npm create vite@latest . -- --template react-ts (프로젝트 생성)
 npm install axios react-router-dom
 npm install -D @types/react-router-dom
 
