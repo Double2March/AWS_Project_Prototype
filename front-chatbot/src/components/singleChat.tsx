@@ -20,7 +20,8 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const API_URL = 'http://3.38.255.228:8000/api/chat';
+  const API_URL = import.meta.env.VITE_APP_BASE_URL;
+  console.log(`${API_URL}`+"/single");
 
   // 스크롤을 항상 최신 메시지로 이동
   const scrollToBottom = () => {
@@ -52,7 +53,7 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
 
     try {
       // 한 번에 응답받는 방식
-      const response = await axios.post(API_URL, {
+      const response = await axios.post(`${API_URL}`+"/single", {
         prompt: userInput,
         systemPrompt: prompt_first
       });

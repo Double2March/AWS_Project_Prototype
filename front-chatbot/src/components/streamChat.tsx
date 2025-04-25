@@ -21,7 +21,8 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
   const [currentResponse, setCurrentResponse] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // const back_chat_url = import.meta.env.VITE_APP_BASE_URL+"stream";
+  const API_URL = import.meta.env.VITE_APP_BASE_URL;
+
 
   // 스크롤을 항상 최신 메시지로 이동
   const scrollToBottom = () => {
@@ -53,7 +54,7 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
     setCurrentResponse('');
 
     try {
-      const response = await fetch(`http://3.38.255.228:8000/api/chat/stream`, {
+      const response = await fetch(`${API_URL}`+"/stream", {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
