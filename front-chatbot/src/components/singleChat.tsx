@@ -20,7 +20,7 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const API_URL = 'http://3.38.255.228:8000/api/chat/single';
+  const API_URL = 'http://3.38.255.228:8000/api/chat';
 
   // 스크롤을 항상 최신 메시지로 이동
   const scrollToBottom = () => {
