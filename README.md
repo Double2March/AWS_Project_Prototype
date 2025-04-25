@@ -43,6 +43,10 @@ aws sts get-caller-identity
 - node Js
 sudo apt install - y nodejs (20.19.x 버전이상)
 
+-python
+sudo apt install python
+sudo apt install python3-pip
+
 ```
 ### front-end 환경설정
 ```
@@ -53,10 +57,14 @@ npm install -D @types/react-router-dom
 npm run dev
 ```
 ### back-end 환경설정
-```python
+```
+
+sudo apt install python-is-python3 << python3으로 default
+sudo apt install [파이썬버전]-venv
 python -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements.txt << 가상환경 안에 설치
+
 
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
