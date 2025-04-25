@@ -9,11 +9,17 @@ from typing import List, Optional
 from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-import BaseModel
+from fastapi.responses import StreamingResponse
+from BaseModel import ChatMessage, ChatRequest, ChatResponse
 import traceback
 
-
 app = FastAPI()
+
+origins = [
+    "http://localhost:5173",  # React 앱의 주소
+    "http://localhost",       # localhost 허용
+    "http://127.0.0.1:5173"  # localhost:5173 허용 (다양한 경우 추가 가능)
+]
 
 # CORS 설정
 app.add_middleware(
@@ -24,11 +30,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# AWS 클라이언트 초기화
+lambda_client = boto3.client('lambda', region_name='ap-northeast-2')
+s3_client = boto3.client('s3', region_name='ap-northeast-2')
+
+# S3 버킷 이름
+BUCKET_NAME = "your-s3-bucket-name"  # 실제 S3 버킷 이름으로 변경하세요
+
 async def generate_bedrock_stream(prompt: str, system_prompt: str):
     # Bedrock 클라이언트 초기화
     bedrock_runtime = boto3.client(
         service_name='bedrock-runtime',
-        region_name='us-northeast-2'  # 사용 중인 리전
+        region_name='ap-northeast-2'  # 사용 중인 리전
     )
     
     # 페이로드 구성
@@ -40,13 +53,18 @@ async def generate_bedrock_stream(prompt: str, system_prompt: str):
         "top_k": 50,
         "system": system_prompt,
         "messages": [
-            {"role": "user", "content": prompt}
+            {
+                "role": "user", 
+                "content": prompt
+            }
         ]
     }
     
     # 스트리밍 응답 호출
     response = bedrock_runtime.invoke_model_with_response_stream(
         modelId='anthropic.claude-3-5-sonnet-20240620-v1:0',
+        contentType="application/json",
+        accept= "application/json",
         body=json.dumps(payload)
     )
     
@@ -54,27 +72,34 @@ async def generate_bedrock_stream(prompt: str, system_prompt: str):
     for event in response.get('body'):
         if 'chunk' in event:
             chunk_data = json.loads(event['chunk']['bytes'])
-            if 'content' in chunk_data and len(chunk_data['content']) > 0:
-                content_text = chunk_data['content'][0]['text']
+            print(chunk_data)
+            if 'delta' in chunk_data and len(chunk_data['delta']) > 0:
+                content_text = chunk_data['delta']['text']
+                
                 yield f"data: {json.dumps({'text': content_text})}\n\n"
                 await asyncio.sleep(0)
+    
     
     # 스트림 종료 신호
     yield f"data: {json.dumps({'done': True})}\n\n"
 
 @app.post("/api/chat/stream")
+
 async def stream_chat(request: ChatRequest):
-    return StreamingResponse(
-        generate_bedrock_stream(request.prompt, request.systemPrompt),
-        media_type="text/event-stream"
-    )
+    try:
+        print("receive request")
+        return StreamingResponse(
+            generate_bedrock_stream(request.prompt, request.systemPrompt),
+            media_type="text/event-stream"
+        )
 
-# AWS 클라이언트 초기화
-lambda_client = boto3.client('lambda', region_name='ap-northeast-2')
-s3_client = boto3.client('s3', region_name='ap-northeast-2')
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"ValueError: {str(e)}")
+        
+    except Exception as e:
+        print(f"Error: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
-# S3 버킷 이름
-BUCKET_NAME = "your-s3-bucket-name"  # 실제 S3 버킷 이름으로 변경하세요
 
 @app.post("/chat", response_model=ChatResponse)
 async def process_chat(chat_message: ChatMessage):

@@ -68,7 +68,7 @@ body {
   cursor: pointer;
 }
 
-.second-page {
+.chat-page {
   height: 95%;
   margin: 0 auto;
   padding: 2rem;
@@ -77,12 +77,12 @@ body {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.second-page h2 {
+.chat-page h2 {
   margin-bottom: 1rem;
   
 }
 
-.second-page p {
+.chat-page p {
   margin-bottom: 1.5rem;
 }
 

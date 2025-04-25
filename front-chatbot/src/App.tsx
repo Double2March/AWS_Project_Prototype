@@ -13,14 +13,14 @@ const Home = () => {
   return (
     <div className="home-container">
       <div className="service-name">AWS IDEA<br/>Maker </div>
-      <button type="button" onClick={() => navigate("/second")}>시작하기</button>
+      <button type="button" onClick={() => navigate("/chat")}>시작하기</button>
     </div>
   );
 };
 
 const ChatPage = () => {
   return (
-    <div className="second-page">
+    <div className="chat-page">
       <Chat username="Guest"/>
     </div>
   );
@@ -33,7 +33,7 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       {isHome ? (
-        <Link to="/second">대화하기</Link>
+        <Link to="/chat">대화하기</Link>
       ) : (
         <Link to="/">돌아가기</Link>
       )}
@@ -49,7 +49,7 @@ const App: React.FC = () => {
         <div className="content">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/second" element={<ChatPage />} />
+            <Route path="/chat" element={<ChatPage />} />
           </Routes>
         </div>
       </div>

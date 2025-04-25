@@ -55,6 +55,8 @@ npm install axios react-router-dom
 npm install -D @types/react-router-dom
 
 npm run dev
+
+npm install --save-dev @types/node << 환경변수 에러날 시
 ```
 ### back-end 환경설정
 ```
