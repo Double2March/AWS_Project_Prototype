@@ -1,5 +1,5 @@
 # 접속주소
-### http://3.88.117.24:5173/
+
 
 <br/>
 
@@ -25,19 +25,46 @@
 ```
 git clone https://github.com/Double2March/AWS_Project_Prototype.git
 ```
+
+### 초기개발 환경
+```
+sudo apt update
+
+- git
+sudo apt install git
+git config -- global user.name "Name"
+git config --global user.email "Email"
+
+- aws cli
+sudo apt install awscli -y
+aws configure
+aws sts get-caller-identity
+
+- node Js
+sudo apt install - y nodejs (20.19.x 버전이상)
+
+-python
+sudo apt install python
+sudo apt install python3-pip
+
+```
 ### front-end 환경설정
 ```
-npm create vite@latest . -- --template react-ts (프로젝트 생성)
+npm install vite
 npm install axios react-router-dom
 npm install -D @types/react-router-dom
 
 npm run dev
 ```
 ### back-end 환경설정
-```python
+```
+
+sudo apt install python-is-python3 << python3으로 default
+sudo apt install [파이썬버전]-venv
 python -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements.txt << 가상환경 안에 설치
+
 
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
