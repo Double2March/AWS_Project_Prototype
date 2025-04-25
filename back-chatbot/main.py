@@ -6,10 +6,12 @@ import asyncio
 import boto3
 from datetime import datetime
 from typing import List, Optional
+from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+import BaseModel
 import traceback
+
 
 app = FastAPI()
 
@@ -22,14 +24,50 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class ChatMessage(BaseModel):
-    message: str
-    username: str
-    timestamp: str
+async def generate_bedrock_stream(prompt: str, system_prompt: str):
+    # Bedrock 클라이언트 초기화
+    bedrock_runtime = boto3.client(
+        service_name='bedrock-runtime',
+        region_name='us-northeast-2'  # 사용 중인 리전
+    )
+    
+    # 페이로드 구성
+    payload = {
+        "anthropic_version": "bedrock-2023-05-31",
+        "max_tokens": 3000,
+        "temperature": 0.2,
+        "top_p": 0.2,
+        "top_k": 50,
+        "system": system_prompt,
+        "messages": [
+            {"role": "user", "content": prompt}
+        ]
+    }
+    
+    # 스트리밍 응답 호출
+    response = bedrock_runtime.invoke_model_with_response_stream(
+        modelId='anthropic.claude-3-5-sonnet-20240620-v1:0',
+        body=json.dumps(payload)
+    )
+    
+    # 스트림 처리
+    for event in response.get('body'):
+        if 'chunk' in event:
+            chunk_data = json.loads(event['chunk']['bytes'])
+            if 'content' in chunk_data and len(chunk_data['content']) > 0:
+                content_text = chunk_data['content'][0]['text']
+                yield f"data: {json.dumps({'text': content_text})}\n\n"
+                await asyncio.sleep(0)
+    
+    # 스트림 종료 신호
+    yield f"data: {json.dumps({'done': True})}\n\n"
 
-class ChatResponse(BaseModel):
-    firstLambdaResult: str
-    presignedUrls: Optional[List[str]] = None
+@app.post("/api/chat/stream")
+async def stream_chat(request: ChatRequest):
+    return StreamingResponse(
+        generate_bedrock_stream(request.prompt, request.systemPrompt),
+        media_type="text/event-stream"
+    )
 
 # AWS 클라이언트 초기화
 lambda_client = boto3.client('lambda', region_name='ap-northeast-2')
