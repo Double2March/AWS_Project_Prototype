@@ -25,9 +25,28 @@
 ```
 git clone https://github.com/Double2March/AWS_Project_Prototype.git
 ```
+
+### 초기개발 환경
+```
+sudo apt update
+
+- git
+sudo apt install git
+git config -- global user.name "Name"
+git config --global user.email "Email"
+
+- aws cli
+sudo apt install awscli -y
+aws configure
+aws sts get-caller-identity
+
+- node Js
+sudo apt install - y nodejs (20.19.x 버전이상)
+
+```
 ### front-end 환경설정
 ```
-npm create vite@latest . -- --template react-ts (프로젝트 생성)
+npm install vite
 npm install axios react-router-dom
 npm install -D @types/react-router-dom
 
