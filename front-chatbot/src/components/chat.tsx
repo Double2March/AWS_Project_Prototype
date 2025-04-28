@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import prompt_first from '../prompt/prompt_first';
 import axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';  // 추가
 
 interface Message {
   id: string;
@@ -53,14 +54,19 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
     try {
       // 한 번에 응답받는 방식
       const response = await axios.post(`${API_URL}`+"/single", {
+        uid : uuidv4(),
         prompt: userInput,
-        systemPrompt: prompt_first
+        systemPrompt: prompt_first,
+        timestamp : new Date().toISOString()
       });
-
-      console.log('응답 데이터:', response.data);
+      
 
       // 응답 메시지 추가
       if (response.data.answer) {
+        //json parsing 로직 추가
+
+
+        
         const aiResponseMessage: Message = {
           id: Date.now().toString() + '-ai',
           text: response.data.answer,
@@ -74,6 +80,7 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
       if (response.data.presignedUrls && response.data.presignedUrls.length > 0) {
         setDownloadUrls(response.data.presignedUrls);
       }
+
     } catch (error) {
       console.error('메시지 전송 중 오류 발생:', error);
       // 오류 메시지 표시
