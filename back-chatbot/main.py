@@ -15,9 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.chatSingle import router as chat_single_router
 from api.chatStream import router as chat_stream_router
 
-
 from BaseModel import ChatMessage, ChatRequest, ChatResponse
-
 
 app = FastAPI()
 
@@ -40,16 +38,34 @@ app.add_middleware(
 app.include_router(chat_single_router)
 app.include_router(chat_stream_router)
 
-# AWS 클라이언트 초기화
-lambda_client = boto3.client('lambda', region_name='ap-northeast-2')
-s3_client = boto3.client('s3', region_name='ap-northeast-2')
 
-# S3 버킷 이름
-BUCKET_NAME = "your-s3-bucket-name"  # 실제 S3 버킷 이름으로 변경하세요
+@app.post("/test", response_model=ChatResponse)
+async def process_chat(chat_message: ChatMessage):
+    try:
+        # 메시지 ID 생성
+        message_id = str(uuid.uuid4())
 
+        first_lambda_result = "첫번재 람다 결과"
+    
+        # 람다 결과 처리
+        second_lambda_result = "두번째 람다 결과"
+        third_lambda_result = "세번째 람다 결과"
+    
+        presigned_urls = ["링크주소 입니다","두번째요"]
+        
+        return ChatResponse(
+            firstLambdaResult=first_lambda_result,
+            presignedUrls=presigned_urls
+        )
+        
+        
+    except Exception as e:
+        traceback.print_exc()  # 전체 에러 스택 출력
+        raise HTTPException(status_code=500, detail=f"처리 중 오류 발생: {str(e)}")
 
 @app.post("/chat", response_model=ChatResponse)
-async def process_chat(chat_message: ChatMessage):
+async def process_chat(chat_message: ChatRequest):
+
     try:
         # 메시지 ID 생성
         message_id = str(uuid.uuid4())
@@ -123,49 +139,6 @@ async def process_chat(chat_message: ChatMessage):
     except Exception as e:
         traceback.print_exc()  # 전체 에러 스택 출력
         raise HTTPException(status_code=500, detail=f"처리 중 오류 발생: {str(e)}")
-
-def invoke_lambda(function_name, payload):
-    """람다 함수를 동기적으로 호출"""
-    response = lambda_client.invoke(
-        FunctionName=function_name,
-        InvocationType='RequestResponse',
-        Payload=json.dumps(payload)
-    )
-    
-    return json.loads(response['Payload'].read().decode('utf-8'))
-
-async def invoke_lambda_async(function_name, payload):
-    """람다 함수를 비동기적으로 호출"""
-    loop = asyncio.get_event_loop()
-    return await loop.run_in_executor(
-        None, 
-        lambda: invoke_lambda(function_name, payload)
-    )
-
-def process_lambda_result(result):
-    """람다 함수 결과 처리"""
-    # 여기서 람다 결과를 가공할 수 있습니다
-    processed_result = f"처리 시간: {datetime.now().isoformat()}\n\n{result}"
-    return processed_result
-
-def upload_to_s3(file_name, content):
-    """S3에 파일 업로드"""
-    s3_client.put_object(
-        Bucket=BUCKET_NAME,
-        Key=file_name,
-        Body=content.encode('utf-8')
-    )
-
-def generate_presigned_url(file_name):
-    """S3 파일에 대한 presigned URL 생성"""
-    return s3_client.generate_presigned_url(
-        'get_object',
-        Params={
-            'Bucket': BUCKET_NAME,
-            'Key': file_name
-        },
-        ExpiresIn=3600  # URL 유효 기간: 1시간
-    )
 
 if __name__ == "__main__":
     import uvicorn
