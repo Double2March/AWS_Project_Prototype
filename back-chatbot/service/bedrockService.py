@@ -1,5 +1,6 @@
 import boto3
 import json
+import re
 
 async def invoke_bedrock_model(max_token,systemPrompt,message):
         print("함수호출")
@@ -35,7 +36,12 @@ async def invoke_bedrock_model(max_token,systemPrompt,message):
         
         try:
             raw_body = response['body'].read()
-            decoded_body = raw_body.decode("utf-8")  # byte → string
+            decoded_body = raw_body.decode("utf-8")
+            data = json.loads(decoded_body)
+
+            text_data = data["content"][0]["text"] 
+            print("\nText_data print :")
+            print(text_data)
 
         except json.JSONDecodeError as e:
                 print(f"JSON 파싱 오류: {e}")   

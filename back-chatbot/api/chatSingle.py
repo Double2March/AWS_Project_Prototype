@@ -99,8 +99,6 @@ async def chat(request: ChatRequest):
         # 데이터 호출 테스트
         #temp_model_data = get_model_data(request.uid)
 
-
-
         #A모델 max_tokens : 2500 / USER_RESPONSE, MODEL_DATA
         #B모델 max_tokens : 2500 / 
         #C모델 max_tokens : 4000 / files [filename, content]
@@ -113,23 +111,11 @@ async def chat(request: ChatRequest):
         #                          PROVISIONING_SCRIPTS[file_path,content]
         #                          BUILD_SCRIPTS[file_path,content]
         
-        
-
-        modelA, modelC,modelD, modelE, modelF = await asyncio.gather(
-            await invoke_bedrock_model(4000, model_b_sysPrompt, model_a_input),
-            await invoke_bedrock_model(4000, model_c_sysPrompt, model_c_input),
-            await invoke_bedrock_model(4000, model_d_sysPrompt, model_d_input),
-            await invoke_bedrock_model(4000, model_e_sysPrompt, model_e_input),
-            await invoke_bedrock_model(4000, model_f_sysPrompt, model_f_input)
-        )
-
-
-        print("modelA : \n" + modelA + "\n==========================")
-        print("modelA : \n" + modelC + "\n==========================")
-        print("modelA : \n" + modelD + "\n==========================")
-        print("modelA : \n" + modelE + "\n==========================")
-        print("modelA : \n" + modelF + "\n==========================")
-
+        #modelA = await invoke_bedrock_model(4000, model_a_sysPrompt, model_a_input) 
+        #modelC = await invoke_bedrock_model(4000, model_c_sysPrompt, model_c_input) 
+        #modelD = await invoke_bedrock_model(4000, model_d_sysPrompt, model_d_input)
+        #modelE = await invoke_bedrock_model(4000, model_e_sysPrompt, model_e_input)
+        #modelF = await invoke_bedrock_model(4000, model_f_sysPrompt, model_f_input)
   
         # 결과 반환
         return {
