@@ -11,21 +11,6 @@ from BaseModel import ChatRequest
 from service.dynamoService import put_model_data, get_model_data
 from service.bedrockService import invoke_bedrock_model
 
-from prompt.prompt_a import systemPrompt as model_a_sysPrompt
-from prompt.prompt_b import systemPrompt as model_b_sysPrompt
-from prompt.prompt_c import systemPrompt as model_c_sysPrompt
-from prompt.prompt_d import systemPrompt as model_d_sysPrompt
-from prompt.prompt_e import systemPrompt as model_e_sysPrompt
-from prompt.prompt_f import systemPrompt as model_f_sysPrompt
-
-from prompt.prompt_a import test_prompt as model_a_input
-from prompt.prompt_b import test_prompt as model_b_input
-from prompt.prompt_c import test_prompt as model_c_input
-from prompt.prompt_d import test_prompt as model_d_input
-from prompt.prompt_e import test_prompt as model_e_input
-from prompt.prompt_f import test_prompt as model_f_input
-
-
 router = APIRouter()
 
 @router.post("/api/chat/single")
@@ -37,61 +22,6 @@ async def chat(request: ChatRequest):
         model_data = ""
         temp_model_data = ""
         response_body=""
-
-        modelA = ""
-        modelB = ""
-        modelC = ""
-        modelD= ""
-        modelE = ""
-        modelF = ""
-
-        # # Bedrock 클라이언트 초기화
-        # bedrock_runtime = boto3.client(
-        #     service_name='bedrock-runtime',
-        #     region_name='ap-northeast-2'  # 사용 중인 리전
-        # )
-        
-        # # 페이로드 구성
-        # payload = {
-        #     "anthropic_version": "bedrock-2023-05-31",
-        #     "max_tokens": 2500,
-        #     "temperature": 0.2,
-        #     "top_p": 0.2,
-        #     "top_k": 50,
-        #     "system": request.systemPrompt,
-        #     "messages": [
-        #         {
-        #             "role": "user", 
-        #             "content": request.prompt
-        #         }
-        #     ]
-        # }
-        
-        # # 일반 모델 호출
-        # response = bedrock_runtime.invoke_model(
-        #     modelId='anthropic.claude-3-5-sonnet-20240620-v1:0',
-        #     contentType="application/json",
-        #     accept="application/json",
-        #     body=json.dumps(payload)
-        # )
-        #response_body = invoke_bedrock_model(4000,model_b, request.prompt)
-
-         # try:
-        #     response_body = json.loads(response['body'].read()) 
-        #     text_data = response_body['content'][0]['text']
-        #     parsed_data = json.loads(text_data)
-        #     user_response = parsed_data['USER_RESPONSE']
-        #     model_data = parsed_data['MODEL_DATA']
-
-        # except json.JSONDecodeError as e:
-        #     print(f"JSON 파싱 오류: {e}")   
-        #     # 줄 번호와 위치 확인
-        #     print(f"오류 위치: 줄 {e.lineno}, 컬럼 {e.colno}")
-        #     print(f"오류 부분: {e.doc[e.pos-20:e.pos+20]}")
-        # except:
-        #     user_response = ""
-        #     model_data = ""
-        #     print("json 파싱 실패")
 
         # dynamoDB에 데이터 추가
         #put_model_data(request.uid, request.timestamp, model_data)
@@ -116,11 +46,12 @@ async def chat(request: ChatRequest):
         #modelD = await invoke_bedrock_model(4000, model_d_sysPrompt, model_d_input)
         #modelE = await invoke_bedrock_model(4000, model_e_sysPrompt, model_e_input)
         #modelF = await invoke_bedrock_model(4000, model_f_sysPrompt, model_f_input)
-  
+        #get_response = await invoke_bedrock_logic()
+
         # 결과 반환
         return {
-            "answer": user_response,
-            "presignedUrls": []  # 필요한 경우 URL을 추가할 수 있습니다
+            "answer": "답변입니다.",
+            "presignedUrls": ["https://idea-maker.s3.amazonaws.com/images-removebg-preview.zip?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAZY46MTYWS6QPRRPO%2F20250430%2Fap-northeast-2%2Fs3%2Faws4_request&X-Amz-Date=20250430T090532Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=902dd829f45742f9c24a7727b224d99f1d30ac6cac442e249f318a30ed38ad0d"]
         }
         
     except ValueError as e:

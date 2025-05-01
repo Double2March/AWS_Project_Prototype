@@ -122,7 +122,7 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
         {isLoading && (
           <div className="message other-message">
             <div className="message-text">
-              생각 중입니다...
+              답변을 생성하고 있습니다..
             </div>
             <div className="message-time">
               {new Date().toLocaleTimeString()}
