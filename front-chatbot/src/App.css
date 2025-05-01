@@ -7,16 +7,16 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  
 }
 
 .app {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  width:100vw;
+  width: 100vw;
   padding-left: 20%;
   padding-right: 20%;
+  background-color: #2A2A2A;
 }
 
 .navbar {
@@ -39,7 +39,6 @@ body {
 .content {
   flex: 1;
 }
-
 
 .home-container {
   max-width: 500px;
@@ -79,14 +78,13 @@ body {
 
 .chat-page h2 {
   margin-bottom: 1rem;
-  
 }
 
 .chat-page p {
   margin-bottom: 1.5rem;
 }
 
-.chat-container {
+/* .chat-container {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -101,6 +99,40 @@ body {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+} */
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 2rem); /* 패딩 고려 */
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: relative; /* 추가 */
+  overflow: hidden; /* 추가 - 내부 요소가 넘치지 않도록 */
+}
+
+.messages-container {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  position: absolute; /* 추가 */
+  top: 0; /* 추가 */
+  bottom: 70px; /* 메시지 입력창 높이만큼 공간 확보 */
+  left: 0; /* 추가 */
+  right: 0; /* 추가 */
+}
+
+.message-input {
+  position: absolute; /* 추가 */
+  bottom: 0; /* 추가 */
+  left: 0; /* 추가 */
+  right: 0; /* 추가 */
+  display: flex;
+  padding: 1rem;
+  border-top: 1px solid #eee;
 }
 
 .message {
@@ -110,9 +142,7 @@ body {
   border-radius: 8px;
 }
 
-
 .message-sender {
-  
   font-weight: bold;
   font-size: 0.8rem;
   margin-bottom: 0.3rem;
@@ -130,9 +160,15 @@ body {
 }
 
 .message-input {
+  position: absolute; /* 추가 */
+  bottom: 0; /* 추가 - 완전히 하단에 고정 */
+  left: 0; /* 추가 */
+  right: 0; /* 추가 */
   display: flex;
   padding: 1rem;
   border-top: 1px solid #eee;
+  background-color: white; /* 추가 - 배경색 지정 */
+  z-index: 10; /* 추가 - 다른 요소보다 앞에 표시 */
 }
 
 .message-input input {
@@ -186,4 +222,102 @@ body {
   font-weight: bold;
   margin-top: 0.5em;
   margin-bottom: 1em;
+}
+
+/* Action button styling */
+.action-message {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.action-button {
+  background-color: #0066CC; /* Complementary blue to #FF9900 */
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  font-weight: 500;
+  margin-bottom: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.action-button:hover {
+  background-color: #0055AA; /* Darker blue on hover */
+  transform: scale(1.03);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.action-button:active {
+  background-color: #004488; /* Even darker blue when clicked */
+  transform: scale(0.98);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.action-button-disabled {
+  background-color: #999999;
+  color: #ffffff;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 5px;
+  user-select: none;
+  box-shadow: none;
+  display: inline-block;
+  min-width: 150px;
+  text-align: center;
+}
+
+/* Own message & other message custom styles with #FF9900 theme */
+.own-message {
+  background-color: #FFF5E6; /* 연한 주황색 배경 */
+  border-left: 3px solid #FF9900; /* 메인 주황색 강조선 */
+  align-self: flex-end;
+}
+
+.other-message {
+  background-color: #f0f0f0;
+  border-left: 3px solid #0066CC; /* 보색인 파란색 강조선 */
+  align-self: flex-start;
+}
+
+/* 로딩 애니메이션 효과 */
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+.action-button-disabled strong {
+  animation: pulse 1.5s infinite;
+  display: inline-block;
+}
+
+/* 전송 버튼 스타일링 */
+.message-input button {
+  background-color: #FF9900;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.8rem 1.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.message-input button:hover {
+  background-color: #E68A00; /* 약간 어두운 주황색 */
+}
+
+.message-input button:active {
+  background-color: #CC7A00; /* 더 어두운 주황색 */
+}
+
+.message-input button:disabled {
+  background-color: #FFCC80; /* 연한 주황색 */
+  cursor: not-allowed;
 }

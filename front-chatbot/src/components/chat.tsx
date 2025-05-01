@@ -1,8 +1,26 @@
-import ReactMarkdown from 'react-markdown';
+// 로딩 텍스트 컴포넌트
+const LoadingText = () => {
+  const [dots, setDots] = useState<string>('.');
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDots(prevDots => {
+        if (prevDots === '.') return '..';
+        if (prevDots === '..') return '...';
+        if (prevDots === '...') return '....';
+        return '.';
+      });
+    }, 500);
+    
+    return () => clearInterval(interval);
+  }, []);
+  
+  return <strong>생성중입니다{dots}</strong>;
+};import ReactMarkdown from 'react-markdown';
 import React, { useState, useEffect, useRef } from 'react';
 import prompt_first from '../prompt/prompt_first';
 import axios from 'axios';
-import { v4 as uuidv4 } from 'uuid';  // 추가
+import { v4 as uuidv4 } from 'uuid';
 
 interface Message {
   id: string;
@@ -11,6 +29,8 @@ interface Message {
   timestamp: Date;
   isAction?: boolean; // Add this property to identify clickable action messages
   actionType?: string; // To identify what type of action this is
+  isButtonDisabled?: boolean; // To track if a button has already been clicked
+  processingComplete?: boolean; // To track if processing is complete
 }
 
 interface ChatProps {
@@ -56,11 +76,11 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
 
     try {
       // 한 번에 응답받는 방식
-      const response = await axios.post(`${API_URL}`+"/single", {
-        uid : uuidv4(),
+      const response = await axios.post(`${API_URL}/single`, {
+        uid: uuidv4(),
         prompt: userInput,
         systemPrompt: prompt_first,
-        timestamp : new Date().toISOString()
+        timestamp: new Date().toISOString()
       });
       
 
@@ -76,13 +96,15 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
         };
         setMessages(prevMessages => [...prevMessages, aiResponseMessage]);
 
+        // 프로젝트 생성 액션 버튼 추가
         const createProjectAction: Message = {
           id: Date.now().toString() + '-action',
-          text: "프로젝트 생성",
+          text: "프로젝트 만들기",
           sender: 'System',
           timestamp: new Date(),
           isAction: true,
-          actionType: 'createProject'
+          actionType: 'createProject',
+          isButtonDisabled: false
         };
         setMessages(prevMessages => [...prevMessages, createProjectAction]);
       }
@@ -107,40 +129,75 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
     }
   };
 
-    // 프로젝트 생성 API 호출 함수
-    const handleCreateProject = async () => {
-      setIsLoading(true);
-      try {
-        // 프로젝트 생성 API 호출
-        const response = await axios.post(`${API_URL}/createProject`, {
-          uid: uuidv4(),
-          username: username,
-          timestamp: new Date().toISOString()
-        });
+  // 프로젝트 생성 API 호출 함수
+  const handleCreateProject = async (messageId: string) => {
+    setIsLoading(true);
+    try {
+      // 버튼이 있는 메시지를 찾아 비활성화 상태로 변경
+      setMessages(prevMessages => 
+        prevMessages.map(msg => 
+          msg.id === messageId 
+            ? {...msg, isButtonDisabled: true, processingComplete: false} 
+            : msg
+        )
+      );
+      
+      // UID 가져오기 - 실제 환경에서는 로그인된 사용자의 UID를 사용하거나 세션에서 가져옵니다
+      const myUid = localStorage.getItem('userUid') || uuidv4(); // 로컬 스토리지에서 가져오거나 새로 생성
+      
+      // 프로젝트 생성 API 호출
+      const response = await axios.post(`${API_URL}/createProject`, {
+        uid: myUid, // 사용자 UID 전송
+        timestamp: new Date().toISOString()
+      });
+      
+      // 응답 메시지 추가
+      const responseMessage: Message = {
+        id: Date.now().toString() + '-project-response',
+        text: response.data.message || '프로젝트 생성 요청이 완료되었습니다.',
+        sender: 'System',
+        timestamp: new Date(),
+      };
+      
+      // 처리가 완료되었음을 표시
+      setMessages(prevMessages => {
+        // 먼저 액션 버튼의 상태를 업데이트
+        const updatedMessages = prevMessages.map(msg => 
+          msg.id === messageId 
+            ? {...msg, processingComplete: true} 
+            : msg
+        );
         
-        // 응답 메시지 추가
-        const responseMessage: Message = {
-          id: Date.now().toString() + '-project-response',
-          text: response.data.message || '프로젝트 생성 요청이 완료되었습니다.',
-          sender: 'System',
-          timestamp: new Date(),
-        };
-        setMessages(prevMessages => [...prevMessages, responseMessage]);
+        // 그 다음에 새 응답 메시지 추가
+        return [...updatedMessages, responseMessage];
+      });
+      
+    } catch (error) {
+      console.error('프로젝트 생성 중 오류 발생:', error);
+      // 오류 메시지 표시
+      const errorMessage: Message = {
+        id: Date.now().toString() + '-project-error',
+        text: '프로젝트 생성 중 오류가 발생했습니다.',
+        sender: 'System',
+        timestamp: new Date(),
+      };
+      
+      // 오류 발생 시에도 버튼 상태를 업데이트
+      setMessages(prevMessages => {
+        // 먼저 액션 버튼의 상태를 업데이트
+        const updatedMessages = prevMessages.map(msg => 
+          msg.id === messageId 
+            ? {...msg, processingComplete: true} 
+            : msg
+        );
         
-      } catch (error) {
-        console.error('프로젝트 생성 중 오류 발생:', error);
-        // 오류 메시지 표시
-        const errorMessage: Message = {
-          id: Date.now().toString() + '-project-error',
-          text: '프로젝트 생성 중 오류가 발생했습니다.',
-          sender: 'System',
-          timestamp: new Date(),
-        };
-        setMessages(prevMessages => [...prevMessages, errorMessage]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+        // 그 다음에 오류 메시지 추가
+        return [...updatedMessages, errorMessage];
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Enter 키 처리 함수
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -149,26 +206,37 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
     }
   };
 
-   // 메시지 렌더링 함수
-   const renderMessage = (message: Message) => {
+  // 메시지 렌더링 함수
+  const renderMessage = (message: Message) => {
     // 액션 버튼인 경우 클릭 가능한 버튼으로 렌더링
     if (message.isAction) {
+      // 처리가 완료되었고 버튼이 비활성화 상태면 아무것도 렌더링하지 않음
+      if (message.isButtonDisabled && message.processingComplete) {
+        return null;
+      }
+      
       return (
         <div 
           key={message.id} 
           className={`message ${message.sender === username ? 'own-message' : 'other-message'} action-message`}
         >
-          <button 
-            className="action-button"
-            onClick={() => {
-              if (message.actionType === 'createProject') {
-                handleCreateProject();
-              }
-            }}
-            disabled={isLoading}
-          >
-            {message.text}
-          </button>
+          {message.isButtonDisabled ? (
+            <div className="action-button-disabled">
+              <LoadingText />
+            </div>
+          ) : (
+            <button 
+              className="action-button"
+              onClick={() => {
+                if (message.actionType === 'createProject') {
+                  handleCreateProject(message.id);
+                }
+              }}
+              disabled={isLoading || message.isButtonDisabled}
+            >
+              {message.text}
+            </button>
+          )}
           <div className="message-time">
             {message.timestamp.toLocaleTimeString()}
           </div>
@@ -199,7 +267,7 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
         {isLoading && (
           <div className="message other-message">
             <div className="message-text">
-              답변을 생성하고 있습니다..
+              답변을 생성하고 있습니다...
             </div>
             <div className="message-time">
               {new Date().toLocaleTimeString()}
