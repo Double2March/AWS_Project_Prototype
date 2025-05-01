@@ -69,65 +69,12 @@ async def process_chat(chat_message: ChatRequest):
     try:
         # 메시지 ID 생성
         message_id = str(uuid.uuid4())
-        """
-        # 첫 번째 람다 함수 호출
-        first_lambda_response = invoke_lambda("first-lambda-function", {
-            "message": chat_message.message,
-            "username": chat_message.username,
-            "timestamp": chat_message.timestamp,
-            "message_id": message_id
-        })
-        """
+        
         first_lambda_result = "첫번재 람다 결과"
         
-        """
-        first_lambda_result = first_lambda_response.get("result", "첫 번째 람다 함수 응답이 없습니다.")
-        
-        # 두 번째, 세 번째 람다 함수를 비동기적으로 호출
-        second_lambda_task = asyncio.create_task(invoke_lambda_async("second-lambda-function", {
-            "message": chat_message.message,
-            "username": chat_message.username,
-            "timestamp": chat_message.timestamp,
-            "message_id": message_id,
-            "first_lambda_result": first_lambda_result
-        }))
-        
-        third_lambda_task = asyncio.create_task(invoke_lambda_async("third-lambda-function", {
-            "message": chat_message.message,
-            "username": chat_message.username,
-            "timestamp": chat_message.timestamp,
-            "message_id": message_id,
-            "first_lambda_result": first_lambda_result
-        }))
-        
-        # 람다 함수 결과 동시에 기다림
-        second_lambda_response, third_lambda_response = await asyncio.gather(
-            second_lambda_task,
-            third_lambda_task
-        )
-        """
         # 람다 결과 처리
         second_lambda_result = "두번째 람다 결과"
         third_lambda_result = "세번째 람다 결과"
-        
-        """
-        second_lambda_result = second_lambda_response.get("result", "두 번째 람다 함수 응답이 없습니다.")
-        third_lambda_result = third_lambda_response.get("result", "세 번째 람다 함수 응답이 없습니다.")
-        
-        # 결과 파일 생성 및 S3에 업로드
-        presigned_urls = ["presigned urls"]
-        
-        
-        # 두 번째 람다 결과 파일 생성 및 업로드
-        second_lambda_file = f"second_lambda_result_{message_id}.txt"
-        upload_to_s3(second_lambda_file, process_lambda_result(second_lambda_result))
-        presigned_urls.append(generate_presigned_url(second_lambda_file))
-        
-        # 세 번째 람다 결과 파일 생성 및 업로드
-        third_lambda_file = f"third_lambda_result_{message_id}.txt"
-        upload_to_s3(third_lambda_file, process_lambda_result(third_lambda_result))
-        presigned_urls.append(generate_presigned_url(third_lambda_file))
-        """
         
         presigned_urls = ["링크주소 입니다","두번째요"]
         

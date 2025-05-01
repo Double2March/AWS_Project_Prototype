@@ -1,7 +1,10 @@
+import os
+import re
 import json
 import asyncio
 import boto3
 import aioboto3
+
 from botocore.exceptions import ClientError
 
 from prompt.prompt_a import systemPrompt as model_a_sysPrompt
@@ -85,36 +88,23 @@ async def invoke_bedrock_model(max_token, system_prompt, message):
         return text_data
 
 async def process_parallel_requests_with_dependencies(model_result):
-    #A모델 max_tokens : 2500 / USER_RESPONSE, MODEL_DATA
-    #B모델 max_tokens : 4000 / 
-    #C모델 max_tokens : 4000 / files [filename, content]
-    #D모델 max_tokens : 2000 / visual_tree
-    #E모델 max_tokens : 4000 / project_name, 
-    #                          source_files[file_path,content], 
-    #                          build_configuration[file_path,content]
-    #                          build_configuration[file_path,content]
-    #F모델 max_tokens : 4000 / USER_RESPONSE[file_name, content]
-    #                          PROVISIONING_SCRIPTS[file_path,content]
-    #                          BUILD_SCRIPTS[file_path,content]
-
     # 결과를 저장할 딕셔너리
-
     results = {}
     
     requires_cloud = parse_requires_cloud(model_result)
     print(requires_cloud)
     
     # B 모델 시작
-    #task_b = asyncio.create_task(invoke_bedrock_model(4000, model_b_sysPrompt, model_result))
-    #results['modelB'] = await task_b
+    #task_b = asyncio.create_task(invoke_bedrock_model(1000, "당신은 유용한 AI 비서입니다.", f"B 모델 요청입니다: 다음 서비스 요약을 확장해주세요: {service_summary}"))
+    
     task_c = None
     if requires_cloud:
-        print("aws 환경 포함")
+        print("requires_cloud가 true이므로 C 모델 실행")
         task_c = asyncio.create_task(
             invoke_bedrock_model(4000, model_c_sysPrompt, model_result)
         )
     else:
-        print("aws 환경 미포함")
+        print("requires_cloud가 false이므로 C 모델 실행 안함")
     
     # D 모델 시작
     task_d = asyncio.create_task(
@@ -135,6 +125,8 @@ async def process_parallel_requests_with_dependencies(model_result):
         invoke_bedrock_model(3500, model_f_sysPrompt, model_d_result)
     )
     
+    # 모든 결과 대기
+    #results['modelB'] = await task_b
     
     # C 모델은 requires_cloud가 true일 경우에만 실행되었으므로, 결과도 조건부로 저장
     if task_c:
@@ -147,15 +139,20 @@ async def process_parallel_requests_with_dependencies(model_result):
     results['modelF'] = await task_f
     
     print("모든 모델 호출 완료")
-    print(task_c)
-    print(task_d)
-    print(task_e)
-    print(task_f)
 
+    print("\n\n\n")
+    print(results['modelC'])
+    print("\n\n\n")
+    print(results['modelD'])
+    print("\n\n\n")
+    print(results['modelE'])
+    print("\n\n\n")
+    print(results['modelF'])
+    print("\n\n\n")
     
     return results
 
-    def parse_requires_cloud(text):
+def parse_requires_cloud(text):
     # 정규식으로 requires_cloud 값을 추출
     pattern = r'requires_cloud:\s*(true|false)'
     match = re.search(pattern, text, re.IGNORECASE)
@@ -166,3 +163,45 @@ async def process_parallel_requests_with_dependencies(model_result):
     
     # 매치가 없으면 기본값으로 False 반환
     return False
+
+def invoke_lambda_function(results):
+    # AWS Lambda 클라이언트 초기화
+    lambda_client = boto3.client('lambda', region_name='ap-northeast-2')
+    
+    # Lambda 함수 호출
+    response = lambda_client.invoke(
+        FunctionName='arn:aws:lambda:ap-northeast-2:671957687853:function:idea-maker-create-file',
+        InvocationType='RequestResponse',
+        Payload=json.dumps(results)
+    )
+    
+    # Lambda 응답 처리
+    response_payload = json.loads(response['Payload'].read())
+    return response_payload  # [user_response, presignedUrls] 형식의 응답 기대
+
+#테스트용 코드 (실제 사용 시 제거)
+if __name__ == "__main__":
+    # 테스트용 model_result 텍스트 예시
+    test_model_result_text = """
+    service : TaskMaster
+    service_summary: TaskMaster - 소규모 팀을 위한 직관적인 프로젝트 및 작업 관리 도구
+functional_requirements: 프로젝트 생성 및 작업 할당, 마감일 추적 및 알림 설정, 팀원 간 실시간 댓글 및 협업, 작업 완료율 및 팀 성과 대시보드
+architecture_pattern: 클라이언트-서버 아키텍처, 단일 페이지 애플리케이션(SPA)
+components: Vue.js 프론트엔드|사용자 인터페이스 및 상호작용|Vue.js, Django 백엔드|비즈니스 로직 및 데이터 처리|Django, PostgreSQL 데이터베이스|데이터 저장 및 관리|PostgreSQL
+frontend_tech: Vue.js, Vuex, Vue Router, axios
+backend_tech: Django, Django REST Framework, Django Channels
+database_tech: PostgreSQL
+infrastructure_tech: AWS EC2, AWS RDS, AWS S3, AWS CloudFront, AWS Route 53, AWS ELB
+data_flow_summary: 사용자 요청 → Vue.js → axios → Django → Django ORM → PostgreSQL, 실시간 업데이트: Django Channels → WebSocket → Vue.js
+requires_cloud: true
+    """
+
+    root_directory = os.path.abspath(os.sep)
+    print(root_directory)
+
+    current_directory = os.getcwd()
+    print("Current working directory:", current_directory)
+    
+    # 함수 테스트
+    response = get_bedrock_response(test_model_result_text)
+    print(f"최종 응답: {response}")
