@@ -1,3 +1,4 @@
+import ReactMarkdown from 'react-markdown';
 import React, { useState, useEffect, useRef } from 'react';
 import prompt_first from '../prompt/prompt_first';
 import axios from 'axios';
@@ -8,6 +9,8 @@ interface Message {
   text: string;
   sender: string;
   timestamp: Date;
+  isAction?: boolean; // Add this property to identify clickable action messages
+  actionType?: string; // To identify what type of action this is
 }
 
 interface ChatProps {
@@ -65,8 +68,6 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
       if (response.data.answer) {
         //json parsing 로직 추가
 
-
-        
         const aiResponseMessage: Message = {
           id: Date.now().toString() + '-ai',
           text: response.data.answer,
@@ -74,6 +75,16 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
           timestamp: new Date(),
         };
         setMessages(prevMessages => [...prevMessages, aiResponseMessage]);
+
+        const createProjectAction: Message = {
+          id: Date.now().toString() + '-action',
+          text: "프로젝트 생성",
+          sender: 'System',
+          timestamp: new Date(),
+          isAction: true,
+          actionType: 'createProject'
+        };
+        setMessages(prevMessages => [...prevMessages, createProjectAction]);
       }
 
       // presigned URL 처리 (만약 서버에서 제공한다면)
@@ -96,6 +107,41 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
     }
   };
 
+    // 프로젝트 생성 API 호출 함수
+    const handleCreateProject = async () => {
+      setIsLoading(true);
+      try {
+        // 프로젝트 생성 API 호출
+        const response = await axios.post(`${API_URL}/createProject`, {
+          uid: uuidv4(),
+          username: username,
+          timestamp: new Date().toISOString()
+        });
+        
+        // 응답 메시지 추가
+        const responseMessage: Message = {
+          id: Date.now().toString() + '-project-response',
+          text: response.data.message || '프로젝트 생성 요청이 완료되었습니다.',
+          sender: 'System',
+          timestamp: new Date(),
+        };
+        setMessages(prevMessages => [...prevMessages, responseMessage]);
+        
+      } catch (error) {
+        console.error('프로젝트 생성 중 오류 발생:', error);
+        // 오류 메시지 표시
+        const errorMessage: Message = {
+          id: Date.now().toString() + '-project-error',
+          text: '프로젝트 생성 중 오류가 발생했습니다.',
+          sender: 'System',
+          timestamp: new Date(),
+        };
+        setMessages(prevMessages => [...prevMessages, errorMessage]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
   // Enter 키 처리 함수
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !isLoading) {
@@ -103,20 +149,51 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
     }
   };
 
+   // 메시지 렌더링 함수
+   const renderMessage = (message: Message) => {
+    // 액션 버튼인 경우 클릭 가능한 버튼으로 렌더링
+    if (message.isAction) {
+      return (
+        <div 
+          key={message.id} 
+          className={`message ${message.sender === username ? 'own-message' : 'other-message'} action-message`}
+        >
+          <button 
+            className="action-button"
+            onClick={() => {
+              if (message.actionType === 'createProject') {
+                handleCreateProject();
+              }
+            }}
+            disabled={isLoading}
+          >
+            {message.text}
+          </button>
+          <div className="message-time">
+            {message.timestamp.toLocaleTimeString()}
+          </div>
+        </div>
+      );
+    }
+    
+    // 일반 메시지인 경우 기존 방식으로 렌더링
+    return (
+      <div 
+        key={message.id} 
+        className={`message ${message.sender === username ? 'own-message' : 'other-message'}`}
+      >
+        <div className="message-text"><ReactMarkdown>{message.text}</ReactMarkdown></div>
+        <div className="message-time">
+          {message.timestamp.toLocaleTimeString()}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="chat-container">
       <div className="messages-container">
-        {messages.map((message) => (
-          <div 
-            key={message.id} 
-            className={`message ${message.sender === username ? 'own-message' : 'other-message'}`}
-          >
-            <div className="message-text">{message.text}</div>
-            <div className="message-time">
-              {message.timestamp.toLocaleTimeString()}
-            </div>
-          </div>
-        ))}
+        {messages.map(renderMessage)}
         
         {/* 로딩 중인 응답 표시 */}
         {isLoading && (
