@@ -16,7 +16,7 @@ def put_model_data(uid, timestamp, model_data):
             'model_data': model_data
         }
         table.put_item(Item=item)
-        print("Item saved successfully : "+ str(model_data))
+        print(str(timestamp) + " | Item saved successfully : "+ str(model_data))
     except ClientError as e:
         print(f"Error saving item: {e}")
         raise
