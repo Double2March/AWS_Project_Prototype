@@ -1,22 +1,10 @@
 # main.py
-import os
-import json
-import uuid
-import asyncio
-import boto3
-import traceback
-
-from datetime import datetime
-from typing import List, Optional
-from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.chatSingle import router as chat_single_router
 from api.chatStream import router as chat_stream_router
-from api.chatBedrock import router as invoke_bedrock_router
-
-from BaseModel import ChatMessage, ChatRequest, ChatResponse
+from api.chatCreateProject import router as invoke_bedrock_router
 
 app = FastAPI()
 

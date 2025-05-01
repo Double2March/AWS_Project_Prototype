@@ -183,17 +183,17 @@ def invoke_lambda_function(results):
 if __name__ == "__main__":
     # 테스트용 model_result 텍스트 예시
     test_model_result_text = """
-    service : TaskMaster
-    service_summary: TaskMaster - 소규모 팀을 위한 직관적인 프로젝트 및 작업 관리 도구
-functional_requirements: 프로젝트 생성 및 작업 할당, 마감일 추적 및 알림 설정, 팀원 간 실시간 댓글 및 협업, 작업 완료율 및 팀 성과 대시보드
-architecture_pattern: 클라이언트-서버 아키텍처, 단일 페이지 애플리케이션(SPA)
-components: Vue.js 프론트엔드|사용자 인터페이스 및 상호작용|Vue.js, Django 백엔드|비즈니스 로직 및 데이터 처리|Django, PostgreSQL 데이터베이스|데이터 저장 및 관리|PostgreSQL
-frontend_tech: Vue.js, Vuex, Vue Router, axios
-backend_tech: Django, Django REST Framework, Django Channels
-database_tech: PostgreSQL
-infrastructure_tech: AWS EC2, AWS RDS, AWS S3, AWS CloudFront, AWS Route 53, AWS ELB
-data_flow_summary: 사용자 요청 → Vue.js → axios → Django → Django ORM → PostgreSQL, 실시간 업데이트: Django Channels → WebSocket → Vue.js
-requires_cloud: true
+        service : TaskMaster
+        service_summary: TaskMaster - 소규모 팀을 위한 직관적인 프로젝트 및 작업 관리 도구
+        functional_requirements: 프로젝트 생성 및 작업 할당, 마감일 추적 및 알림 설정, 팀원 간 실시간 댓글 및 협업, 작업 완료율 및 팀 성과 대시보드
+        architecture_pattern: 클라이언트-서버 아키텍처, 단일 페이지 애플리케이션(SPA)
+        components: Vue.js 프론트엔드|사용자 인터페이스 및 상호작용|Vue.js, Django 백엔드|비즈니스 로직 및 데이터 처리|Django, PostgreSQL 데이터베이스|데이터 저장 및 관리|PostgreSQL
+        frontend_tech: Vue.js, Vuex, Vue Router, axios
+        backend_tech: Django, Django REST Framework, Django Channels
+        database_tech: PostgreSQL
+        infrastructure_tech: AWS EC2, AWS RDS, AWS S3, AWS CloudFront, AWS Route 53, AWS ELB
+        data_flow_summary: 사용자 요청 → Vue.js → axios → Django → Django ORM → PostgreSQL, 실시간 업데이트: Django Channels → WebSocket → Vue.js
+        requires_cloud: true
     """
 
     root_directory = os.path.abspath(os.sep)

@@ -11,17 +11,22 @@ from prompt.prompt_a import systemPrompt as model_a_sysPrompt
 
 from BaseModel import ChatRequest
 from service.dynamoService import put_model_data
-from service.bedrockService import invoke_bedrock_model
+from service.bedrockService import invoke_userReponse
 
 router = APIRouter()
 
 @router.post("/api/chat/single")
 async def chat(request: ChatRequest):
     try:    
-        invoke_bedrock_model(2000,model_a_sysPrompt,request.message )
+
+        text_data = invoke_userReponse(2000,model_a_sysPrompt,request.prompt )
 
         # USER_RESPONSE와 MODEL_DATA 분리
         user_response, model_result = extract_sections(text_data)
+        print("================================")
+        print(f"A model 사용자 응답 : {user_response}")
+        print(f"A model 모델 응답 : {model_result}")
+        print("================================")
 
         # dynamoDB에 데이터 추가
         put_model_data(request.uid, request.timestamp, model_result)

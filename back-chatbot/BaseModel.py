@@ -12,3 +12,7 @@ class ChatRequest(BaseModel):
     prompt: str
     systemPrompt: str
     timestamp: datetime
+
+class CreateRequest(BaseModel):
+    uid : UUID
+    timestamp: datetime

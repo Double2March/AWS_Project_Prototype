@@ -16,7 +16,9 @@ def put_model_data(uid, timestamp, model_data):
             'model_data': model_data
         }
         table.put_item(Item=item)
-        print(str(timestamp) + " | Item saved successfully : "+ str(model_data))
+        print("==== dynamoService.py====")
+        print(f"uid : {str(uid)}\ntime : {str(timestamp)}\n input : \n{str(model_data)}")
+        print("==========================")
     except ClientError as e:
         print(f"Error saving item: {e}")
         raise
@@ -33,6 +35,7 @@ def get_model_data(uid: str):
         if 'Items' in response and len(response['Items']) > 0:
             latest_item = response['Items'][0]
             model_data = latest_item['model_data']  # 최신 model_data
+            print(f"Dynamo 호출결과 : {model_data}")
             return model_data
         else:
             return None  # 해당 uuid에 대한 데이터가 없으면 None 반환

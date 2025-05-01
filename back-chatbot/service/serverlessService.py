@@ -1,3 +1,4 @@
+import json
 import boto3
 from botocore.exceptions import ClientError
 from boto3.dynamodb.conditions import Key
@@ -23,21 +24,18 @@ async def invoke_lambda_async(function_name, payload):
         lambda: invoke_lambda(function_name, payload)
     )
 
-
+# 람다함수 호출
 def invoke_lambda_function(results):
-    """
-    Lambda 함수를 호출하고 응답을 받는 함수
-    """
     # AWS Lambda 클라이언트 초기화
     lambda_client = boto3.client('lambda', region_name='ap-northeast-2')
     
     # Lambda 함수 호출
     response = lambda_client.invoke(
-        FunctionName='your-lambda-function-name',
+        FunctionName='arn:aws:lambda:ap-northeast-2:671957687853:function:idea-maker-create-file',
         InvocationType='RequestResponse',
         Payload=json.dumps(results)
     )
     
     # Lambda 응답 처리
     response_payload = json.loads(response['Payload'].read())
-    return response_payload  # [user_response, presignedUrls] 형식의 응답 기대
+    return response_payload

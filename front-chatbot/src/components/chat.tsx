@@ -1,22 +1,4 @@
-// 로딩 텍스트 컴포넌트
-const LoadingText = () => {
-  const [dots, setDots] = useState<string>('.');
-  
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setDots(prevDots => {
-        if (prevDots === '.') return '..';
-        if (prevDots === '..') return '...';
-        if (prevDots === '...') return '....';
-        return '.';
-      });
-    }, 500);
-    
-    return () => clearInterval(interval);
-  }, []);
-  
-  return <strong>생성중입니다{dots}</strong>;
-};import ReactMarkdown from 'react-markdown';
+import ReactMarkdown from 'react-markdown';
 import React, { useState, useEffect, useRef } from 'react';
 import prompt_first from '../prompt/prompt_first';
 import axios from 'axios';
@@ -42,9 +24,26 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
   const [newMessage, setNewMessage] = useState('');
   const [downloadUrls, setDownloadUrls] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [sessionUuid, setSessionUuid] = useState<string>(''); // UUID 상태 추가
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const API_URL = import.meta.env.VITE_APP_BASE_URL;
+
+   // 컴포넌트 마운트 시 UUID 초기화
+   useEffect(() => {
+    // 로컬 스토리지에서 UUID 가져오기
+    const savedUuid = localStorage.getItem('chatSessionUuid');
+    
+    if (savedUuid) {
+      // 이미 저장된 UUID가 있다면 사용
+      setSessionUuid(savedUuid);
+    } else {
+      // 없다면 새로 생성하고 저장
+      const newUuid = uuidv4();
+      localStorage.setItem('chatSessionUuid', newUuid);
+      setSessionUuid(newUuid);
+    }
+  }, []);
 
   // 스크롤을 항상 최신 메시지로 이동
   const scrollToBottom = () => {
@@ -77,7 +76,7 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
     try {
       // 한 번에 응답받는 방식
       const response = await axios.post(`${API_URL}/single`, {
-        uid: uuidv4(),
+        uid: sessionUuid,
         prompt: userInput,
         systemPrompt: prompt_first,
         timestamp: new Date().toISOString()
@@ -131,7 +130,8 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
 
   // 프로젝트 생성 API 호출 함수
   const handleCreateProject = async (messageId: string) => {
-    setIsLoading(true);
+    setIsLoading(false);
+
     try {
       // 버튼이 있는 메시지를 찾아 비활성화 상태로 변경
       setMessages(prevMessages => 
@@ -142,22 +142,24 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
         )
       );
       
-      // UID 가져오기 - 실제 환경에서는 로그인된 사용자의 UID를 사용하거나 세션에서 가져옵니다
-      const myUid = localStorage.getItem('userUid') || uuidv4(); // 로컬 스토리지에서 가져오거나 새로 생성
-      
-      // 프로젝트 생성 API 호출
+      // 세션션저장된 UUID 사용
       const response = await axios.post(`${API_URL}/createProject`, {
-        uid: myUid, // 사용자 UID 전송
+        uid: sessionUuid, // 세션에 저장된 UUID 사용
         timestamp: new Date().toISOString()
       });
-      
+    
       // 응답 메시지 추가
       const responseMessage: Message = {
         id: Date.now().toString() + '-project-response',
-        text: response.data.message || '프로젝트 생성 요청이 완료되었습니다.',
+        text: response.data.answer,
         sender: 'System',
         timestamp: new Date(),
       };
+
+      // presigned URL 처리 (만약 서버에서 제공한다면)
+      if (response.data.presignedUrls && response.data.presignedUrls.length > 0) {
+        setDownloadUrls(response.data.presignedUrls);
+      }
       
       // 처리가 완료되었음을 표시
       setMessages(prevMessages => {
@@ -204,6 +206,26 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
     if (e.key === 'Enter' && !isLoading) {
       handleSendMessage();
     }
+  };
+
+  // 로딩 텍스트 컴포넌트
+  const LoadingText = () => {
+    const [dots, setDots] = useState<string>('.');
+    
+    useEffect(() => {
+      const interval = setInterval(() => {
+        setDots(prevDots => {
+          if (prevDots === '.') return '..';
+          if (prevDots === '..') return '...';
+          if (prevDots === '...') return '....';
+          return '.';
+        });
+      }, 500);
+      
+      return () => clearInterval(interval);
+    }, []);
+    
+    return <strong>생성중입니다{dots}</strong>;
   };
 
   // 메시지 렌더링 함수
