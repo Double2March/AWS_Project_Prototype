@@ -7,32 +7,30 @@ import asyncio
 from datetime import datetime
 from fastapi import APIRouter, HTTPException
 
+from prompt.prompt_a import systemPrompt as model_a_sysPrompt
+
 from BaseModel import ChatRequest
-from service.dynamoService import put_model_data, get_model_data
+from service.dynamoService import put_model_data
 from service.bedrockService import invoke_bedrock_model
 
 router = APIRouter()
 
 @router.post("/api/chat/single")
 async def chat(request: ChatRequest):
-    print("호출")
-    try:
-        # user_response, model_data 변수 생성성
-        user_response = ""
-        model_data = ""
-        temp_model_data = ""
-        response_body=""
+    try:    
+        invoke_bedrock_model(2000,model_a_sysPrompt,request.message )
+
+        # USER_RESPONSE와 MODEL_DATA 분리
+        user_response, model_result = extract_sections(text_data)
 
         # dynamoDB에 데이터 추가
-        #put_model_data(request.uid, request.timestamp, model_data)
-
-        # 데이터 호출 테스트
-        #temp_model_data = get_model_data(request.uid)
-
-        get_response = get_bedrock_response(model_result)
-
+        put_model_data(request.uid, request.timestamp, model_result)
+        
         # 결과 반환
-        return get_response
+        return {
+            "answer": user_response,
+            "presignedUrls": []  # 필요한 경우 URL을 추가할 수 있습니다
+        }
         
     except ValueError as e:
         raise HTTPException(status_code=400, detail=f"ValueError: {str(e)}")
@@ -41,10 +39,15 @@ async def chat(request: ChatRequest):
         print(f"Error: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
-    except ValidationError as e:
-        # Pydantic 모델 유효성 검사 실패 시
-        raise HTTPException(status_code=422, detail=f"Validation error: {e.errors()}")
-
-    except Exception as e:
-        # 다른 예외 처리
-        raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
+def extract_sections(text):
+    # USER_SECTION 추출
+    user_section_pattern = r'===USER_SECTION===\s*([\s\S]*?)\s*===USER_SECTION_END==='
+    user_section_match = re.search(user_section_pattern, text)
+    user_response = user_section_match.group(1).strip() if user_section_match else ''
+    
+    # MODEL_SECTION 추출
+    model_section_pattern = r'===MODEL_SECTION_START===\s*([\s\S]*?)\s*===MODEL_SECTION_END==='
+    model_section_match = re.search(model_section_pattern, text)
+    model_result = model_section_match.group(1).strip() if model_section_match else ''
+    
+    return user_response, model_result
