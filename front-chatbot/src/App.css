@@ -57,7 +57,7 @@ body {
   border-radius: 4px;
 }
 
-.home-container button {
+.home-container .start-button {
   width: 100%;
   padding: 0.8rem;
   background-color: #ff9900;
@@ -65,6 +65,17 @@ body {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.home-container .backlog-button {
+  width: 100%;
+  padding: 0.8rem;
+  background-color: #1c1919;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
 }
 
 .chat-page {
@@ -101,30 +112,31 @@ body {
   flex-direction: column;
 } */
 
+/* 채팅 컨테이너 수정 */
 .chat-container {
   display: flex;
   flex-direction: column;
-  height: calc(100% - 2rem); /* 패딩 고려 */
+  height: 100%;
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  position: relative; /* 추가 */
-  overflow: hidden; /* 추가 - 내부 요소가 넘치지 않도록 */
+  position: relative;
+  overflow: hidden;
 }
 
+/* 메시지 컨테이너 수정 */
 .messages-container {
   flex: 1;
   padding: 1rem;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  position: absolute; /* 추가 */
-  top: 0; /* 추가 */
-  bottom: 70px; /* 메시지 입력창 높이만큼 공간 확보 */
-  left: 0; /* 추가 */
-  right: 0; /* 추가 */
+  position: absolute;
+  top: 0;
+  bottom: 140px; /* 입력창 + 다운로드 링크 공간 확보 */
+  left: 0;
+  right: 0;
 }
-
 .message-input {
   position: absolute; /* 추가 */
   bottom: 0; /* 추가 */
@@ -159,18 +171,17 @@ body {
   margin-top: 0.3rem;
 }
 
+/* 메시지 입력창 수정 */
 .message-input {
-  position: absolute; /* 추가 */
-  bottom: 0; /* 추가 - 완전히 하단에 고정 */
-  left: 0; /* 추가 */
-  right: 0; /* 추가 */
+  position: absolute;
+  bottom: 0; /* 화면 최하단에 위치 */
+  left: 0;
+  right: 0;
   display: flex;
   padding: 1rem;
+  background-color: white;
   border-top: 1px solid #eee;
-  background-color: white; /* 추가 - 배경색 지정 */
-  z-index: 10; /* 추가 - 다른 요소보다 앞에 표시 */
 }
-
 .message-input input {
   flex: 1;
   padding: 0.8rem;
@@ -188,10 +199,19 @@ body {
   cursor: pointer;
 }
 
+/* 다운로드 링크 박스 수정 */
 .download-links {
+  position: absolute;
+  bottom: 80px; /* 메시지 입력창 위에 위치 */
+  left: 0;
+  right: 0;
   padding: 1rem;
   background-color: #f8f9fa;
   border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee; /* 하단 경계선 추가 */
+  height: auto; /* 높이는 내용에 맞게 조정 */
+  max-height: 80px; /* 최대 높이 설정 */
+  overflow-y: auto; /* 내용이 많을 경우 스크롤 */
 }
 
 .download-links h4 {
@@ -399,19 +419,6 @@ body {
 
 .clear-logs-button:hover {
   background-color: #777777;
-}
-
-.test-logs-button {
-  background-color: #0066CC;
-}
-
-.test-logs-button:hover {
-  background-color: #0055AA;
-}
-
-.test-logs-button:disabled {
-  background-color: #999999;
-  cursor: not-allowed;
 }
 
 /* 로그 입력 영역 수정 */

@@ -56,6 +56,8 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
 
+    setDownloadUrls([]);
+
     // 새 메시지 객체 생성
     const messageObj: Message = {
       id: Date.now().toString(),
@@ -300,16 +302,11 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
 
       {downloadUrls.length > 0 && (
         <div className="download-links">
-          <h4>다운로드 가능한 파일:</h4>
-          <ul>
-            {downloadUrls.map((url, index) => (
-              <li key={index}>
-                <a href={url} target="_blank" rel="noopener noreferrer">
-                  결과 파일 {index + 1} 다운로드
-                </a>
-              </li>
+          {downloadUrls.map((url, index) => (
+              <a href={url} target="_blank" rel="noopener noreferrer">
+              결과 파일 {index + 1} 다운로드
+            </a>
             ))}
-          </ul>
         </div>
       )}
 

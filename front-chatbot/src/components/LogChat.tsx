@@ -55,14 +55,14 @@ const LogChat: React.FC<LogChatProps> = ({ username, wsUrl }) => {
           console.log('WebSocket 연결 성공');
           setIsConnected(true);
           
-          // 연결 성공 메시지 추가
-          const connectMessage: Message = {
-            id: uuidv4(),
-            text: '백엔드 서버에 연결되었습니다. 출력값을 수신합니다...',
-            sender: 'System',
-            timestamp: new Date(),
-          };
-          setMessages(prev => [...prev, connectMessage]);
+          // // 연결 성공 메시지 추가
+          // const connectMessage: Message = {
+          //   id: uuidv4(),
+          //   text: '백엔드 서버에 연결되었습니다. 출력값을 수신합니다...',
+          //   sender: 'System',
+          //   timestamp: new Date(),
+          // };
+          // setMessages(prev => [...prev, connectMessage]);
         };
         
         ws.onmessage = (event) => {
@@ -205,14 +205,7 @@ const LogChat: React.FC<LogChatProps> = ({ username, wsUrl }) => {
         >
           로그 지우기
         </button>
-        
-        <button 
-          className="test-logs-button" 
-          onClick={handleGenerateTestLogs}
-          disabled={!isConnected}
-        >
-          테스트 로그 생성
-        </button>
+      
       </div>
     </div>
   );

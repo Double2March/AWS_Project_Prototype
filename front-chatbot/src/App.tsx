@@ -19,8 +19,8 @@ const Home = () => {
   return (
     <div className="home-container">
       <div className="service-name">AWS IDEA<br/>Maker </div>
-      <button type="button" onClick={() => navigate("/chat")}>시작하기</button>
-      <button type="button" onClick={openLogInNewWindow}>백엔드 로그</button>
+      <button type="button" className="start-button" onClick={() => navigate("/chat")}>시작하기</button>
+      <button type="button" className="backlog-button"onClick={openLogInNewWindow}>백엔드 로그 보기</button>
     </div>
   );
 };
