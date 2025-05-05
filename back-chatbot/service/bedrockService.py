@@ -30,7 +30,9 @@ def get_bedrock_response(model_result):
         
         # 병렬 처리 실행 (model_result 전달)
 
+        
         results = loop.run_until_complete(process_parallel_requests_with_dependencies(model_result))
+        send_to_websocket("코드파일 생성 람다 호출")
         lambda_response = invoke_lambda_function(results)
         
         return lambda_response
@@ -64,6 +66,9 @@ async def get_bedrock_response_async(model_result):
         return [f"오류가 발생했습니다: {str(e)}", None]
 
 def invoke_userReponse(max_token, system_prompt, user_message):
+    
+    send_to_websocket("사용자 입력모델 답변 :")
+
      # Bedrock 클라이언트 초기화
     bedrock_runtime = boto3.client(
         service_name='bedrock-runtime',
@@ -99,7 +104,6 @@ def invoke_userReponse(max_token, system_prompt, user_message):
     data = json.loads(decoded_body)
     text_data = data["content"][0]["text"]
 
-    send_to_websocket("사용자 입력모델 답변 :")
     send_to_websocket(text_data)
 
     return text_data

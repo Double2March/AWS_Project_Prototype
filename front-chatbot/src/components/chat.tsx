@@ -3,6 +3,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 
+import rehypeRaw from 'rehype-raw';
+import rehypeHighlight from 'rehype-highlight';
+
 interface Message {
   id: string;
   text: string;
@@ -27,6 +30,7 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const API_URL = import.meta.env.VITE_APP_BASE_URL;
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
    // 컴포넌트 마운트 시 UUID 초기화
    useEffect(() => {
@@ -42,6 +46,31 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
       localStorage.setItem('chatSessionUuid', newUuid);
       setSessionUuid(newUuid);
     }
+
+    const systemMessage: Message = {
+      id: Date.now().toString() + '-init',
+      text: `
+      # 입력 양식
+      서비스명(영어): 
+      서비스 목적: 
+
+      # 기능 요구사항
+      주요 기능:
+      - 
+      - 
+      - 
+
+      # 기술 스택 요구사항
+      프론트엔드(원하는 기술이 있다면) : 
+      백엔드(원하는 기술이 있다면) :
+      데이터베이스(원하는 기술이 있다면): 
+      클라우드 환경(원하는 기술이 있다면) : `,
+      sender: 'System',
+      timestamp: new Date(),
+    };
+    setMessages([systemMessage]);
+
+
   }, []);
 
   // 스크롤을 항상 최신 메시지로 이동
@@ -52,6 +81,7 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
 
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
@@ -71,9 +101,15 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
     
     // 입력 필드 초기화 및 로딩 상태 설정
     const userInput = newMessage;
+
     setNewMessage('');
     setIsLoading(true);
 
+    if (textareaRef.current) {
+      textareaRef.current.style.height = '40px'; // 초기 높이로 재설정
+    }
+
+   
     try {
       // 한 번에 응답받는 방식
       const response = await axios.post(`${API_URL}/single`, {
@@ -85,8 +121,7 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
 
       // 응답 메시지 추가
       if (response.data.answer) {
-        //json parsing 로직 추가
-
+    
         const aiResponseMessage: Message = {
           id: Date.now().toString() + '-ai',
           text: response.data.answer,
@@ -95,7 +130,8 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
         };
         setMessages(prevMessages => [...prevMessages, aiResponseMessage]);
 
-        // 프로젝트 생성 액션 버튼 추가
+        if (response.data.create) {
+          // 프로젝트 생성 액션 버튼 추가
         const createProjectAction: Message = {
           id: Date.now().toString() + '-action',
           text: "프로젝트 만들기",
@@ -106,6 +142,7 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
           isButtonDisabled: false
         };
         setMessages(prevMessages => [...prevMessages, createProjectAction]);
+        }        
       }
 
       // presigned URL 처리 (만약 서버에서 제공한다면)
@@ -126,6 +163,14 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setNewMessage(e.target.value);
+    
+    // 높이 자동 조절
+    e.target.style.height = 'auto';
+    e.target.style.height = `${e.target.scrollHeight}px`;
   };
 
   // 프로젝트 생성 API 호출 함수
@@ -201,13 +246,6 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
     }
   };
 
-  // Enter 키 처리 함수
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !isLoading) {
-      handleSendMessage();
-    }
-  };
-
   // 로딩 텍스트 컴포넌트
   const LoadingText = () => {
     const [dots, setDots] = useState<string>('.');
@@ -227,6 +265,8 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
     
     return <strong>생성중입니다{dots}</strong>;
   };
+
+
 
   // 메시지 렌더링 함수
   const renderMessage = (message: Message) => {
@@ -265,6 +305,7 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
         </div>
       );
     }
+
     
     // 일반 메시지인 경우 기존 방식으로 렌더링
     return (
@@ -272,7 +313,13 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
         key={message.id} 
         className={`message ${message.sender === username ? 'own-message' : 'other-message'}`}
       >
-        <div className="message-text"><ReactMarkdown>{message.text}</ReactMarkdown></div>
+        <div className="message-text">
+          <ReactMarkdown 
+            rehypePlugins={[rehypeRaw, rehypeHighlight]}
+          >
+            {message.text}
+          </ReactMarkdown>
+        </div>
         <div className="message-time">
           {message.timestamp.toLocaleTimeString()}
         </div>
@@ -310,8 +357,8 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
         </div>
       )}
 
-      <div className="message-input">
-        <input
+      {/* <div className="message-input">
+        <textarea
           type="text"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
@@ -322,7 +369,25 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
         <button onClick={handleSendMessage} disabled={isLoading}>
           {isLoading ? '전송 중...' : '전송'}
         </button>
+      </div> */}
+
+      <div className="message-input">
+        <textarea 
+          ref={textareaRef}
+          value={newMessage} 
+          onChange={handleTextareaChange}
+          placeholder="메시지를 입력하세요..." 
+          onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              handleSendMessage();
+            }
+          }}
+          style={{ height: 'auto' }}
+        />
+        <button onClick={handleSendMessage}>전송</button>
       </div>
+
     </div>
   );
 };
