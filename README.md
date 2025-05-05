@@ -50,8 +50,10 @@ sudo apt install python3-pip
 ```
 ### front-end 환경설정
 ```
+
 npm install vite
 npm install axios react-router-dom
+npm install react-markdown
 npm install -D @types/react-router-dom
 
 npm run dev

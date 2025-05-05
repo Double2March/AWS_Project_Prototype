@@ -1,0 +1,58 @@
+import re
+import json
+import boto3
+import traceback
+import asyncio
+
+from datetime import datetime
+from fastapi import APIRouter, HTTPException
+
+from prompt.prompt_a import systemPrompt as model_a_sysPrompt
+
+from BaseModel import ChatRequest
+from service.dynamoService import put_model_data
+from service.bedrockService import invoke_userReponse
+
+router = APIRouter()
+
+@router.post("/api/chat/single")
+async def chat(request: ChatRequest):
+    try:    
+
+        text_data = invoke_userReponse(2000,model_a_sysPrompt,request.prompt )
+
+        # USER_RESPONSE와 MODEL_DATA 분리
+        user_response, model_result = extract_sections(text_data)
+        print("================================")
+        print(f"A model 사용자 응답 : {user_response}")
+        print(f"A model 모델 응답 : {model_result}")
+        print("================================")
+
+        # dynamoDB에 데이터 추가
+        put_model_data(request.uid, request.timestamp, model_result)
+        
+        # 결과 반환
+        return {
+            "answer": user_response,
+            "presignedUrls": []  # 필요한 경우 URL을 추가할 수 있습니다
+        }
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"ValueError: {str(e)}")
+        
+    except Exception as e:
+        print(f"Error: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+def extract_sections(text):
+    # USER_SECTION 추출
+    user_section_pattern = r'===USER_SECTION===\s*([\s\S]*?)\s*===USER_SECTION_END==='
+    user_section_match = re.search(user_section_pattern, text)
+    user_response = user_section_match.group(1).strip() if user_section_match else ''
+    
+    # MODEL_SECTION 추출
+    model_section_pattern = r'===MODEL_SECTION_START===\s*([\s\S]*?)\s*===MODEL_SECTION_END==='
+    model_section_match = re.search(model_section_pattern, text)
+    model_result = model_section_match.group(1).strip() if model_section_match else ''
+    
+    return user_response, model_result
