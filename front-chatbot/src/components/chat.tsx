@@ -1,6 +1,5 @@
 import ReactMarkdown from 'react-markdown';
 import React, { useState, useEffect, useRef } from 'react';
-import prompt_first from '../prompt/prompt_first';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -78,7 +77,6 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
       const response = await axios.post(`${API_URL}/single`, {
         uid: sessionUuid,
         prompt: userInput,
-        systemPrompt: prompt_first,
         timestamp: new Date().toISOString()
       });
       

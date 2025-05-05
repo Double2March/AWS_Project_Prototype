@@ -14,6 +14,8 @@ from prompt.prompt_f import systemPrompt as model_f_sysPrompt
 
 from service.serverlessService import invoke_lambda_function
 
+from service.websocketService import send_to_websocket
+
 
 def get_bedrock_response(model_result):
 
@@ -96,6 +98,8 @@ def invoke_userReponse(max_token, system_prompt, user_message):
     decoded_body = raw_body.decode("utf-8")
     data = json.loads(decoded_body)
     text_data = data["content"][0]["text"]
+
+    send_to_websocket(text_data)
 
     return text_data
 
@@ -183,6 +187,7 @@ async def process_parallel_requests_with_dependencies(model_result):
     # D의 결과 기다리기
     model_d_result = await task_d
     results['modelD'] = model_d_result
+    send_to_websocket(results['modelD'])
     
     print("D 완료, E와 F 시작")
     
@@ -198,18 +203,17 @@ async def process_parallel_requests_with_dependencies(model_result):
     # C 모델은 requires_cloud가 true일 경우에만 실행되었으므로, 결과도 조건부로 저장
     if task_c:
         results['modelC'] = await task_c
+        send_to_websocket(results['modelC'])
 
     else:
         results['modelC'] = "no data"
     
     results['modelE'] = await task_e
     results['modelF'] = await task_f
+    send_to_websocket(results['modelE'])
+    send_to_websocket(results['modelF'])
     
     print("모든 모델 호출 완료")
-    print(task_c)
-    print(task_d)
-    print(task_e)
-    print(task_f)
 
     return results
 

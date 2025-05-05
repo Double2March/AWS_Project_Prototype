@@ -23,10 +23,6 @@ async def chat(request: ChatRequest):
 
         # USER_RESPONSE와 MODEL_DATA 분리
         user_response, model_result = extract_sections(text_data)
-        print("================================")
-        print(f"A model 사용자 응답 : {user_response}")
-        print(f"A model 모델 응답 : {model_result}")
-        print("================================")
 
         # dynamoDB에 데이터 추가
         put_model_data(request.uid, request.timestamp, model_result)
