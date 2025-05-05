@@ -1,10 +1,6 @@
-import ReactMarkdown from 'react-markdown';
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
-
-import rehypeRaw from 'rehype-raw';
-import rehypeHighlight from 'rehype-highlight';
 
 interface Message {
   id: string;
@@ -314,11 +310,7 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
         className={`message ${message.sender === username ? 'own-message' : 'other-message'}`}
       >
         <div className="message-text">
-          <ReactMarkdown 
-            rehypePlugins={[rehypeRaw, rehypeHighlight]}
-          >
-            {message.text}
-          </ReactMarkdown>
+        {message.text}
         </div>
         <div className="message-time">
           {message.timestamp.toLocaleTimeString()}
