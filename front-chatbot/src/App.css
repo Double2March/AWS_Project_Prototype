@@ -165,13 +165,6 @@ body {
   background-color: white;
   border-top: 1px solid #eee;
 }
-/* .message-input input {
-  flex: 1;
-  padding: 0.8rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  margin-right: 0.5rem;
-} */
 
 .message-input textarea {
   flex: 1;
