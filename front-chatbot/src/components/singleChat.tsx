@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import prompt_first from '../prompt/prompt_first';
 import axios from 'axios';
 
 interface Message {
@@ -54,8 +53,7 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
     try {
       // 한 번에 응답받는 방식
       const response = await axios.post(`${API_URL}`+"/single", {
-        prompt: userInput,
-        systemPrompt: prompt_first
+        prompt: userInput
       });
 
       console.log('응답 데이터:', response.data);

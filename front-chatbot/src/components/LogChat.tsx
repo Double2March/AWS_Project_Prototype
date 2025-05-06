@@ -133,31 +133,6 @@ const LogChat: React.FC<LogChatProps> = ({ username, wsUrl }) => {
     scrollToBottom();
   }, [messages]);
 
-  // 테스트 로그 생성 요청
-  const handleGenerateTestLogs = () => {
-    if (webSocketRef.current && webSocketRef.current.readyState === WebSocket.OPEN) {
-      webSocketRef.current.send("/test");
-      
-      // 테스트 요청 메시지 추가
-      const testRequestMessage: Message = {
-        id: uuidv4(),
-        text: '테스트 로그 생성 요청을 보냈습니다.',
-        sender: username,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, testRequestMessage]);
-    } else {
-      // 연결 없음 메시지 추가
-      const noConnectionMessage: Message = {
-        id: uuidv4(),
-        text: '서버에 연결되어 있지 않습니다.',
-        sender: 'System',
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, noConnectionMessage]);
-    }
-  };
-
   // 로그 지우기
   const handleClearLogs = () => {
     setMessages([]);

@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import prompt_first from '../prompt/prompt_first';
-import axios from 'axios';
 
 interface Message {
   id: string;
@@ -60,8 +58,7 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          prompt: userInput,
-          systemPrompt: prompt_first
+          prompt: userInput
         }),
       });
 
@@ -116,12 +113,12 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
     } catch (error) {
       console.error('메시지 전송 중 오류 발생:', error);
       // 오류 메시지 표시
-      const errorMessage: Message = {
-        id: Date.now().toString() + '-error',
-        text: '메시지 전송 중 오류가 발생했습니다.',
-        sender: 'System',
-        timestamp: new Date(),
-      };
+      // const errorMessage: Message = {
+      //   id: Date.now().toString() + '-error',
+      //   text: '메시지 전송 중 오류가 발생했습니다.',
+      //   sender: 'System',
+      //   timestamp: new Date(),
+      // };
       //setMessages(prevMessages => [...prevMessages, errorMessage]);
       setIsLoading(false);
     }
