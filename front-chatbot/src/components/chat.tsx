@@ -1,6 +1,10 @@
+import ReactMarkdown from 'react-markdown';
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
+
+import rehypeRaw from 'rehype-raw';
+import rehypeHighlight from 'rehype-highlight';
 
 interface Message {
   id: string;
@@ -45,22 +49,19 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
 
     const systemMessage: Message = {
       id: Date.now().toString() + '-init',
-      text: `
-      # 입력 양식
-      서비스명(영어): 
-      서비스 목적: 
-
-      # 기능 요구사항
-      주요 기능:
-      - 
-      - 
-      - 
-
-      # 기술 스택 요구사항
-      프론트엔드(원하는 기술이 있다면) : 
-      백엔드(원하는 기술이 있다면) :
-      데이터베이스(원하는 기술이 있다면): 
-      클라우드 환경(원하는 기술이 있다면) : `,
+      text: ` **======== 입력예시 =========**
+**기본 정보**
+○ 서비스명 (영어):
+○ 서비스 목적: 
+**기능 요구사항**
+●
+●
+●
+**기술 스택**
+○ 프론트엔드 (선택): 
+○ 백엔드 (선택): 
+○ 데이터베이스 (선택): 
+○ 클라우드 환경 (선택):`,
       sender: 'System',
       timestamp: new Date(),
     };
@@ -309,9 +310,11 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
         key={message.id} 
         className={`message ${message.sender === username ? 'own-message' : 'other-message'}`}
       >
-        <div className="message-text">
-        {message.text}
-        </div>
+        <div className="message-text"><ReactMarkdown 
+          rehypePlugins={[rehypeRaw, rehypeHighlight]}>
+          {message.text}
+          </ReactMarkdown>
+          </div>
         <div className="message-time">
           {message.timestamp.toLocaleTimeString()}
         </div>
