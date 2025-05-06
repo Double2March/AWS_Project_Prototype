@@ -10,12 +10,14 @@ from fastapi import APIRouter, HTTPException
 from BaseModel import CreateRequest
 from service.dynamoService import get_model_data
 from service.bedrockService import get_bedrock_response_async
+from service.websocketService import send_to_websocket
 
 router = APIRouter()
 
 @router.post("/api/chat/createProject")
 async def chat(request: CreateRequest):
     print("bedrock logic 호출")
+    send_to_websocket("프로젝트 만들기 시작!")
     try:
         
         #호출 정보출력

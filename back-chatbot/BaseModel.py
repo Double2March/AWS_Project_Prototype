@@ -10,7 +10,6 @@ class ChatResponse(BaseModel):
 class ChatRequest(BaseModel):
     uid : UUID
     prompt: str
-    systemPrompt: str
     timestamp: datetime
 
 class CreateRequest(BaseModel):

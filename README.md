@@ -53,7 +53,6 @@ sudo apt install python3-pip
 
 npm install vite
 npm install axios react-router-dom
-npm install react-markdown
 npm install -D @types/react-router-dom
 
 npm run dev
