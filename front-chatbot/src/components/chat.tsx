@@ -26,8 +26,9 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
   const [newMessage, setNewMessage] = useState('');
   const [downloadUrls, setDownloadUrls] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [sessionUuid, setSessionUuid] = useState<string>(''); // UUID 상태 추가
+  const [sessionUuid, setSessionUuid] = useState<string>(''); 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isCreatingProject, setIsCreatingProject] = useState(false);
 
   const API_URL = import.meta.env.VITE_APP_BASE_URL;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -172,7 +173,8 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
 
   // 프로젝트 생성 API 호출 함수
   const handleCreateProject = async (messageId: string) => {
-    setIsLoading(false);
+    setIsLoading(true);
+    setIsCreatingProject(true);
 
     try {
       // 버튼이 있는 메시지를 찾아 비활성화 상태로 변경
@@ -240,6 +242,7 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
       });
     } finally {
       setIsLoading(false);
+      setIsCreatingProject(false);
     }
   };
 
@@ -328,7 +331,7 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
         {messages.map(renderMessage)}
         
         {/* 로딩 중인 응답 표시 */}
-        {isLoading && (
+        {isLoading && !isCreatingProject && (
           <div className="message other-message">
             <div className="message-text">
               답변을 생성하고 있습니다...
@@ -352,26 +355,13 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
         </div>
       )}
 
-      {/* <div className="message-input">
-        <textarea
-          type="text"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder="메시지를 입력하세요..."
-          disabled={isLoading}
-        />
-        <button onClick={handleSendMessage} disabled={isLoading}>
-          {isLoading ? '전송 중...' : '전송'}
-        </button>
-      </div> */}
-
       <div className="message-input">
         <textarea 
           ref={textareaRef}
           value={newMessage} 
           onChange={handleTextareaChange}
           placeholder="메시지를 입력하세요..." 
+          disabled={isLoading || isCreatingProject}
           onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
@@ -380,7 +370,9 @@ const Chat: React.FC<ChatProps> = ({ username }) => {
           }}
           style={{ height: 'auto' }}
         />
-        <button onClick={handleSendMessage}>전송</button>
+        <button onClick={handleSendMessage} disabled={isLoading || isCreatingProject}>
+          {isLoading ? '전송 중...' : '전송'}
+        </button>
       </div>
 
     </div>
